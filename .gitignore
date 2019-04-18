@@ -1,0 +1,9 @@
+# Data
+data/
+training batches/
+
+# Generated images
+newPokemon/
+
+# Some old files
+PokemonGan_old.py
