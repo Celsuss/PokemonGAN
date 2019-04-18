@@ -1,5 +1,6 @@
 # Data
 data/
+new data/
 training batches/
 
 # Generated images
@@ -7,3 +8,8 @@ newPokemon/
 
 # Some old files
 PokemonGan_old.py
+
+# Old directories
+checkpoint/
+newPokemon old/
+tmp/

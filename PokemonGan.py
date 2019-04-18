@@ -27,10 +27,6 @@ data_path = './data'
 checkpoint_path = './checkpoints'
 checkpoint_epoch_path = checkpoint_path + '/checkpoint.epoch'
 
-checkpoint_path_old = './checkpoint'
-checkpoint_prefix_old = os.path.join(checkpoint_path_old, 'checkpoint.ckpgt')
-checkpoint_epoch_path_old = checkpoint_prefix_old + '.epoch'
-
 SAVE_ITERATIONS = 1
 
 DEBUG = False
@@ -133,35 +129,21 @@ def loadDataset():
 
 def createGenerator():
     model = tf.keras.Sequential()
-    # model.add(layers.Dense(7*7*256, use_bias=False, input_shape=(100,)))
-    # model.add(layers.Dense(7*7*256*3, use_bias=False, input_shape=(noise_dim,)))
-    # 4*4*512=8192
+    
     model.add(layers.Dense(4*4*512, use_bias=False, input_shape=(noise_dim,)))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    # model.add(layers.Reshape((7, 7, 256)))
-    # model.add(layers.Reshape((7*3, 7*3, 256*3)))
-    model.add(layers.Reshape((4, 4, 512)))
-    # assert model.output_shape == (None, 7, 7, 256) # Note: None is the batch size
-    # assert model.output_shape == (None, 4, 4, 512) # Note: None is the batch size
-    
+    model.add(layers.Reshape((4, 4, 512)))    
 
-    # model.add(layers.Conv2DTranspose(128, (5, 5), strides=(1, 1), padding='same', use_bias=False))
     model.add(layers.Conv2DTranspose(256, (5, 5), strides=(2, 2), padding='same', use_bias=False))
-    # assert model.output_shape == (None, 7, 7, 128)
-    # assert model.output_shape == (None, 4, 4, 128)  
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    # model.add(layers.Conv2DTranspose(64, (5, 5), strides=(2, 2), padding='same', use_bias=False))
     model.add(layers.Conv2DTranspose(128, (5, 5), strides=(2, 2), padding='same', use_bias=False))
-    # assert model.output_shape == (None, 14, 14, 64)
-    # assert model.output_shape == (None, 8, 8, 64)
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
 
-    ## New ones
     model.add(layers.Conv2DTranspose(64, (5, 5), strides=(2, 2), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
@@ -169,7 +151,6 @@ def createGenerator():
     model.add(layers.Conv2DTranspose(32, (5, 5), strides=(2, 2), padding='same', use_bias=False))
     model.add(layers.BatchNormalization())
     model.add(layers.LeakyReLU())
-    ##
 
     model.add(layers.Conv2DTranspose(CHANNEL, (5, 5), strides=(2, 2), padding='same', use_bias=False, activation='tanh'))
 
@@ -181,12 +162,10 @@ def createGenerator():
 
 def createDiscriminator():
     model = tf.keras.Sequential()
-    # model.add(layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same', 
-    #                                  input_shape=[28, 28, 1]))
-    # 128*128*3=49152
+
     model.add(layers.Conv2D(64, (5, 5), strides=(2, 2), padding='same', 
                                      input_shape=[HEIGHT, WIDTH, CHANNEL]))
-    # 
+    
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
       
@@ -194,7 +173,6 @@ def createDiscriminator():
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
 
-    ## New ones
     model.add(layers.Conv2D(256, (5, 5), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
@@ -202,7 +180,6 @@ def createDiscriminator():
     model.add(layers.Conv2D(512, (5, 5), strides=(2, 2), padding='same'))
     model.add(layers.LeakyReLU())
     model.add(layers.Dropout(0.3))
-    ##
        
     model.add(layers.Flatten())
     model.add(layers.Dense(1))
@@ -223,14 +200,8 @@ def saveCheckpointAndImage(ckptManager, generator, seed, epoch):
     # Utils.saveImages(images, [8,8], newPoke_path)
 
     if (epoch+1) % SAVE_ITERATIONS == 0:
-        # ckpt.step.assign_add(1)
         save_path = ckptManager.save()
         print("Saved checkpoint {}".format(save_path))
-        # print("Saved checkpoint for step {}: {}".format(int(ckptManager.step), save_path))
-
-        # checkpoint.save(file_prefix=checkpoint_prefix)
-        # checkpoint.save()
-        # Save which epoch
         with open(checkpoint_epoch_path, "wb") as f:
             f.write(b"%d" % (epoch + 1))
 
@@ -244,17 +215,6 @@ def restoreModel(checkpoint, ckptManager):
     else:
         print('No checkpoints found, start training at epoch 0')
         return 0
-        
-
-    # if os.path.isfile(checkpoint_epoch_path_old):
-    #     with open(checkpoint_epoch_path_old, "rb") as f:
-    #         checkpoint.restore(tf.train.latest_checkpoint(checkpoint_path_old))
-    #         start_epoch = int(f.read())
-    #         print("Restoring previous checkpoint at epoch {}".format(start_epoch+1))
-    #         return start_epoch
-    # else:
-    #     print("No checkpoints found, start training at epoch 0")
-    #     return 0
 
 ######################
 # Train the networks #
@@ -281,19 +241,11 @@ def train():
     generator_optimizer = tf.keras.optimizers.Adam(generatorLearningRate)
     discriminator_optimizer = tf.keras.optimizers.Adam(discriminatorLearningRate)
 
+    # Create a Checkpoint and a CheckpointManager
     checkpoint = tf.train.Checkpoint(generator_optimizer=generator_optimizer,
                                      discriminator_optimizer=discriminator_optimizer,
                                      generator=generator, discriminator=discriminator)
-    ckptManager = tf.train.CheckpointManager(checkpoint, checkpoint_path, max_to_keep=3)
-
-
-    # checkpoint_path = './checkpoints'
-    # checkpoint_epoch_path = checkpoint_path + '/checkpoint.epoch'
-
-    # checkpoint_path_old = './checkpoint'
-    # checkpoint_prefix_old = os.path.join(checkpoint_path_old, 'checkpoint.ckpgt')
-    # checkpoint_epoch_path_old = checkpoint_prefix_old + '.epoch'
-
+    ckptManager = tf.train.CheckpointManager(checkpoint, checkpoint_path, max_to_keep=2)
 
     # We will use this seed when we save the images but not when we train.
     seed = tf.random.normal([num_samples_to_generate, noise_dim])
