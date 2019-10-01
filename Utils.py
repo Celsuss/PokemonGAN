@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
-from scipy.misc import imsave
+# from scipy.misc import imsave
+from imageio import imwrite
 import numpy as np
 
 def generate_and_save_images(image, name, path):
@@ -41,7 +42,8 @@ def merge(images, size):
 def saveImages(images, size, path):
     images = inverse_transform(images)
     images = np.squeeze(merge(images, size))
-    return imsave(path, images)
+    return imwrite(path, images)
+    # return imsave(path, images)
 
     # return imsave(inverse_transform(images), size, image_path)
     # image = np.squeeze(merge(images, size))

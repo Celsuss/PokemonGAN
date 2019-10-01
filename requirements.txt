@@ -1,7 +1,8 @@
+numpy==1.16.2
 matplotlib==3.0.3
 scipy==1.2.1
 opencv_python==4.0.0.21
-tensorflow==2.0.0-alpha0
-numpy==1.16.2
+tensorflow==2.0.0a0
 utils==0.9.0
-ipython==7.4.0
+ipython==7.8.0
+imageio==2.5.0
