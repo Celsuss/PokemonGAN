@@ -22,7 +22,7 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 version = 'newPokemon'
 newPoke_path = './' + version
-data_path = './data'
+data_path = './data/training'
 
 checkpoint_path = './checkpoints'
 checkpoint_epoch_path = checkpoint_path + '/checkpoint.epoch'
@@ -293,8 +293,6 @@ def trainStep(images, generator, discriminator, generator_optimizer, discriminat
     discriminator_optimizer.apply_gradients(zip(graidents_of_discriminator, discriminator.trainable_variables))
 
     return gen_loss, disc_loss
-
-
 
 
 ##############
