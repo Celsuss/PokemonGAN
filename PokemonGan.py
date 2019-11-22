@@ -7,6 +7,7 @@ import random
 import Utils
 import time
 import math
+import glob
 import sys
 import os
 
@@ -22,7 +23,7 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 version = 'newPokemon'
 newPoke_path = './' + version
-data_path = './data/training'
+data_path = 'data/training'
 
 checkpoint_path = './checkpoints'
 checkpoint_epoch_path = checkpoint_path + '/checkpoint.epoch'
@@ -44,6 +45,8 @@ discriminatorFilters = [64, 128, 256, 512]
 
 generatorLearningRate = 1e-4
 discriminatorLearningRate = 1e-4
+
+image_endings = ['jpg', 'jpeg', 'png']
 
 #%%
 #############################
@@ -84,18 +87,15 @@ def loadAndPreprocessImage(file_path):
 
 def getImagePaths():
     print('Start loading and process data')
-    current_dir = os.getcwd()
+    current_dir = os.path.dirname(os.path.realpath(__file__))
     data_root = os.path.join(current_dir, data_path)
-    data_root = pathlib.Path(data_root)
-    print('Data root directory: {}'.format(data_root))
-
-    all_image_paths = list(data_root.glob('*.*'))
-    all_image_paths = [str(path) for path in all_image_paths]
-    random.shuffle(all_image_paths)
-    image_count = len(all_image_paths)
+    pokemon_files = []
+    [pokemon_files.extend(glob.glob(os.path.join(data_root, '*/*.'+i))) for i in image_endings]
+    
+    image_count = len(pokemon_files)
     print("Number of images: {}".format(image_count))
 
-    return all_image_paths
+    return pokemon_files
 
 def loadDataset():
     paths = getImagePaths()
@@ -300,8 +300,8 @@ def trainStep(images, generator, discriminator, generator_optimizer, discriminat
 ##############
 
 def checkArgs():
-    if len(sys.argv) == 2:
-        if sys.argv[1] == '-d':
+    for i in range(1, len(sys.argv)):
+        if sys.argv[i] == '-d':
             global DEBUG
             DEBUG = True
             print("Debug active")
