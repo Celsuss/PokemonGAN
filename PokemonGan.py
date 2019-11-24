@@ -28,7 +28,8 @@ data_path = 'data/training'
 checkpoint_path = './checkpoints'
 checkpoint_epoch_path = checkpoint_path + '/checkpoint.epoch'
 
-SAVE_ITERATIONS = 1
+SAVE_ITERATIONS = 10
+SAVE_IMAGE_ITERATION = 10
 
 DEBUG = False
 N_DEBUG_PLOT_IMAGES = 3
@@ -38,7 +39,7 @@ num_samples_to_generate = 8*8
 
 HEIGHT, WIDTH, CHANNEL = 128, 128, 3
 BATCH_SIZE = 64
-EPOCH = 5000
+EPOCH = 10000
 
 generatorFilters = [512, 256, 128, 64]
 discriminatorFilters = [64, 128, 256, 512]
@@ -91,7 +92,7 @@ def getImagePaths():
     data_root = os.path.join(current_dir, data_path)
     pokemon_files = []
     [pokemon_files.extend(glob.glob(os.path.join(data_root, '*/*.'+i))) for i in image_endings]
-    
+
     image_count = len(pokemon_files)
     print("Number of images: {}".format(image_count))
 
@@ -115,13 +116,13 @@ def loadDataset():
     # # `prefetch` lets the dataset fetch batches, in the background while the model is training.
     # ds = ds.prefetch(buffer_size=AUTOTUNE)
 
-    ds = images_ds.shuffle(buffer_size=len(paths)).batch(BATCH_SIZE)
+    data_base = images_ds.shuffle(buffer_size=len(paths)).batch(BATCH_SIZE)
     n_batch = len(paths)/BATCH_SIZE
     print('ds len: {}, n_batch: {}'.format(len(paths), n_batch))
     
-    print('Dataset: {}'.format(ds))
+    print('Dataset: {}'.format(data_base))
 
-    return ds, n_batch
+    return data_base, n_batch
 
 ########################
 # Create the Generator #
@@ -196,12 +197,13 @@ def saveCheckpointAndImage(ckptManager, generator, seed, epoch):
     images = generator(seed, training=False)
     name = 'epoch{:04d}.png'.format(epoch+1)
 
-    Utils.generate_and_save_images(images, name, newPoke_path)
+    if (epoch+1) % SAVE_IMAGE_ITERATION == 0:
+        Utils.generate_and_save_images(images, name, newPoke_path)
     # Utils.saveImages(images, [8,8], newPoke_path)
 
     if (epoch+1) % SAVE_ITERATIONS == 0:
         save_path = ckptManager.save()
-        print("Saved checkpoint {}".format(save_path))
+        print("Saved checkpoint {} epoch {}".format(save_path, epoch+1))
         with open(checkpoint_epoch_path, "wb") as f:
             f.write(b"%d" % (epoch + 1))
 
@@ -305,6 +307,10 @@ def checkArgs():
             global DEBUG
             DEBUG = True
             print("Debug active")
+        elif sys.argv[i] == '-p' or sys.argv[i] == '--path':
+            data_path == sys.argv[i+1]
+            print('Setting path to: {}'.format(data_path))
+
 
 if __name__ == '__main__':
     checkArgs()
