@@ -23,8 +23,7 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 # Create variables #
 ####################
 
-version = 'newPokemon'
-newPoke_path = './' + version
+newPoke_path = './newPokemon'
 data_path = 'data/training'
 
 checkpoint_path = './checkpoints'
@@ -312,8 +311,10 @@ def checkArgs():
         elif sys.argv[i] == '-p' or sys.argv[i] == '--path':
             data_path == sys.argv[i+1]
             print('Setting path to: {}'.format(data_path))
-        # elif sys.argv[]
-
+        elif sys.argv[i] == '-c' or sys.argv[i] == '--config':
+            checkpoint_path = sys.argv[i+1]
+        elif sys.argv[i] == '-s' or sys.argv[i] == '--save':
+            newPoke_path = sys.argv[i+1]
 
 if __name__ == '__main__':
     checkArgs()
