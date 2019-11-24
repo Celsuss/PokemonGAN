@@ -9,6 +9,9 @@ newPokemon/
 # Some old files
 PokemonGan_old.py
 
+# Python
+__pycache__/
+
 # Old directories
 checkpoint/
 newPokemon old/
