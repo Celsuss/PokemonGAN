@@ -15,6 +15,8 @@ import tensorflow.keras.layers as layers
 
 print('Tensorflow ' + tf.__version__)
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 ####################
@@ -310,6 +312,7 @@ def checkArgs():
         elif sys.argv[i] == '-p' or sys.argv[i] == '--path':
             data_path == sys.argv[i+1]
             print('Setting path to: {}'.format(data_path))
+        # elif sys.argv[]
 
 
 if __name__ == '__main__':
