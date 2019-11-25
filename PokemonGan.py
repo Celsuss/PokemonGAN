@@ -322,7 +322,7 @@ def checkArgs():
             newPoke_path = sys.argv[i+1]
         elif sys.argv[i] == '-g' or sys.argv[i] == '--gpu':
             global use_single_gpu
-            use_single_gpu = sys.argv[i+1]
+            use_single_gpu = int(sys.argv[i+1])
 
 def configTensorflow():
     gpus = tf.config.experimental.list_physical_devices('GPU')
