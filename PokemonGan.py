@@ -51,6 +51,8 @@ discriminatorLearningRate = 1e-4
 
 image_endings = ['jpg', 'jpeg', 'png']
 
+use_single_gpu = -1
+
 #%%
 #############################
 # Functions to print images #
@@ -310,14 +312,35 @@ def checkArgs():
             DEBUG = True
             print("Debug active")
         elif sys.argv[i] == '-p' or sys.argv[i] == '--path':
+            global data_path
             data_path == sys.argv[i+1]
             print('Setting path to: {}'.format(data_path))
         elif sys.argv[i] == '-c' or sys.argv[i] == '--config':
+            global checkpoint_path
             checkpoint_path = sys.argv[i+1]
         elif sys.argv[i] == '-s' or sys.argv[i] == '--save':
+            global newPoke_path
             newPoke_path = sys.argv[i+1]
+        elif sys.argv[i] == '-g' or sys.argv[i] == '--gpu':
+            global use_single_gpu
+            use_single_gpu = int(sys.argv[i+1])
+
+def configTensorflow():
+    gpus = tf.config.experimental.list_physical_devices('GPU')
+    print('GPUs found: {}'.format(gpus))
+    
+    if gpus and use_single_gpu < len(gpus) and use_single_gpu >= 0:
+        # Restrict TensorFlow to only use the one gpu
+        try:
+            tf.config.experimental.set_visible_devices(gpus[use_single_gpu], 'GPU')
+            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
+        except RuntimeError as e:
+            # Visible devices must be set before GPUs have been initialized
+            print(e)
 
 if __name__ == '__main__':
     checkArgs()
+    configTensorflow()
     print("PokemonGanV2")
     train()
