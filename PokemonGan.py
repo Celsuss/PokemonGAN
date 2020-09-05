@@ -14,6 +14,7 @@ import os
 import tensorflow.keras.layers as layers
 
 print('Tensorflow ' + tf.__version__)
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
